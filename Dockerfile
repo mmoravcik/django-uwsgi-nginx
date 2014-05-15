@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ubuntu:precise
+from ubuntu:12.04
 
 maintainer Dockerfiles
 
-run echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
 run apt-get update
-run apt-get install -y build-essential git
+run apt-get install -y build-essential
 run apt-get install -y python python-dev python-setuptools
 run apt-get install -y nginx supervisor
 run easy_install pip
@@ -29,8 +28,9 @@ run pip install uwsgi
 # install nginx
 run apt-get install -y python-software-properties
 run apt-get update
-RUN add-apt-repository -y ppa:nginx/stable
+run add-apt-repository -y ppa:nginx/stable
 run apt-get install -y sqlite3
+run apt-get install -y vim
 
 # install our code
 add . /home/docker/code/
@@ -42,11 +42,8 @@ run ln -s /home/docker/code/nginx-app.conf /etc/nginx/sites-enabled/
 run ln -s /home/docker/code/supervisor-app.conf /etc/supervisor/conf.d/
 
 # run pip install
-run pip install -r /home/docker/code/app/requirements.txt
-
-# install django, normally you would remove this step because your project would already
-# be installed in the code/app/ directory
-run django-admin.py startproject website /home/docker/code/app/ 
+run pip install -r /home/docker/code/app/hello_docker/deploy/requirements.txt
+run python /home/docker/code/app/manage.py syncdb --noinput
 
 expose 80
 cmd ["supervisord", "-n"]
